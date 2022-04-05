@@ -18,7 +18,7 @@ FROM docker:git AS docker
 
 ## Install AWS CLI and add other components
 ## Copies the app, Reg, Helm and Docker to same image
-FROM alpine:latest
+FROM alpine/git:latest
 RUN apk add --no-cache \
         python3 \
         py3-pip \
