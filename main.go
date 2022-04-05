@@ -574,7 +574,7 @@ func gitConfig() {
 	Command(`git config user.email "<>"`, workingDir)
 }
 
-func commitAndPush(branchName string, message string) {
+func commitAndPush(branchName string, message string) (changes bool) {
 
 	gitConfig()
 
@@ -585,6 +585,15 @@ func commitAndPush(branchName string, message string) {
 	}
 
 	log.Print("Committing changes to remote branch...")
+
+	gitStatus := string(Command("git status --porcelain", workingDir))
+
+	if gitStatus == "" {
+		log.Print("No changes, exiting")
+		changes = false
+		return
+	}
+
 	Command("git add -A", workingDir)
 	Command(fmt.Sprintf(`git commit -m "%s"`, message), workingDir)
 
@@ -595,6 +604,8 @@ func commitAndPush(branchName string, message string) {
 	}
 
 	log.Print("Successfully pushed changes to remote branch!")
+	changes = true
+	return changes
 
 }
 
@@ -638,7 +649,12 @@ func PullRequest(charts []Chart, workingDir string, changedImages bool) {
 		return
 	}
 
-	commitAndPush(branchName, "Updated chart versions")
+	changes := commitAndPush(branchName, "Updated chart versions")
+
+	if !changes {
+		log.Print("No changes for a pull request")
+		return
+	}
 
 	mainBranch := os.Getenv("MAIN_BRANCH")
 
