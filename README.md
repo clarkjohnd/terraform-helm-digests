@@ -133,7 +133,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Helm version update
-        uses: clarkjohnd/terraform-helm-digests@v0.0.2
+        uses: clarkjohnd/terraform-helm-digests@v0.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           quay-username: ${{ secrets.QUAY_USERNAME }}
@@ -150,10 +150,11 @@ name: Update Image Digests
 on:
   push:
     paths:
-      - 'charts.yaml'
-      - 'images.yaml'
+      - 'charts.yaml' # Get digests on manual charts.yaml change
+      - 'images.yaml' # Get digests if someone has changed this file
     branches-ignore:
-      - 'main'
+      - 'main'        # Ignore when PR'd into main
+      - 'd/helm/**'   # Ignore Helm version upgrade branches
   workflow_dispatch:
 
 jobs:
@@ -166,7 +167,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Helm version update
-        uses: clarkjohnd/terraform-helm-digests@v0.0.2
+        uses: clarkjohnd/terraform-helm-digests@v0.0.1
         with:
           digests-only: "true"
           github-token: ${{ secrets.GITHUB_TOKEN }}

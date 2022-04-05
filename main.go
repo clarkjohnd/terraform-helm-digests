@@ -611,7 +611,7 @@ func commitAndPush(branchName string, message string) (changes bool) {
 
 func PullRequest(charts []Chart, workingDir string, changedImages bool) {
 
-	branchName := fmt.Sprintf("helm-update-%s", uuid.New().String()[0:6])
+	branchName := fmt.Sprintf("d/helm/%s", uuid.New().String()[0:6])
 	pullRequestTitle := "Bump "
 	pullRequestBody := "## Terraform Helm Updater\n"
 
