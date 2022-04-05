@@ -508,6 +508,8 @@ func checkList(list []string, checkEntry string) bool {
 // Passwords are not logged.
 func stdinLogin(registry string, username string, password string) {
 
+	var cmd *exec.Cmd
+
 	// Additional commands for ECR registries.
 	// AWS CLI on Docker image used to generate a temporary password.
 	// Password then provided to Docker login command.
@@ -521,16 +523,28 @@ func stdinLogin(registry string, username string, password string) {
 		os.Setenv("AWS_REGION", region)
 
 		// Generate ECR password with CLI
-		newPassword, err := exec.Command("aws", "ecr", "get-login-password", "--region", region).Output()
-		check(err)
+		cmd = exec.Command("aws", "ecr", "get-login-password", "--region", region)
+		var out bytes.Buffer
+		var stderr bytes.Buffer
+
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+
+		// Log error if present
+		if err != nil {
+			MultilineLog(fmt.Sprint(err) + ": " + stderr.String())
+			log.Fatal(err)
+		}
 
 		username = "AWS"
-		password = string(newPassword)
+		password = out.String()
 
 	}
 
 	// Pass password into command and run
-	cmd := exec.Command("docker", "login", registry, "--username", username, "--password-stdin")
+	cmd = exec.Command("docker", "login", registry, "--username", username, "--password-stdin")
 	cmd.Stdin = strings.NewReader(password)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
