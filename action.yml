@@ -1,6 +1,6 @@
 # action.yml
-name: 'Terraform Helm Digests'
-description: 'Pulls image digests for Helm charts'
+name: 'Terraform Helm Updater'
+description: 'Updates Helm charts in Terraform modules and pulls Docker image digests'
 inputs:
   working-directory:
     description: 'Directory to run the action in (must be a Git repository)'
