@@ -35,6 +35,18 @@ Below is an example ```images.yaml``` file:
     arm64: sha256:1a90d6055480de3f3d1288fd6b8093079ec6fefc4d63dc8cc6510e42dded356f
 ```
 
+## Components
+
+The Docker image associated with this action contains:
+
+- The main Go app in this repository
+- Reg, a tool for for pulling image data from registries
+- Docker CLI, used to authenticate with registries
+- AWS CLI, used to authenticate with ECR registries
+- Helm, used to pull and parse Helm charts
+- Git, used to create and push commits
+- GitHub CLI, used to create pull requests
+
 ## Updating Helm chart versions
 
 This part of the action will:
@@ -63,6 +75,8 @@ This part of the action will:
 - Stores the AMD64 and ARM64 image digests to the ```images.yaml``` file
 
 This action uses [Reg](https://github.com/genuinetools/reg) to pull manifest data for Docker images. Although generally the images used are placed in public registries (```quay.io```, ```k8s.gcr.io```, ```602401143452.dkr.ecr.us-west-2.amazonaws.com``` etc.), even these public registries require a "login" to access using the Docker V2 API, which Reg uses. To access the following registries, certain credentials are required, which can be stored as repository secrets and passed as environmental variables to the action. Ideally, all credentials used should be linked to accounts that are standalone and isolated away from any other Quay.io, AWS or GCP accounts.
+
+## Docker Registry Logins
 
 ### quay.io
 
@@ -112,6 +126,22 @@ ECR registries cannot be logged into with static credentials. For this reason, t
 ### Docker.io
 
 No further action required for public Docker registries.
+
+## Template Generation Values
+
+Some Helm charts require specific values to deploy the chart. Also, other charts may require values to enable addons that include images. Without these values, the templates containing the images won't be generated.
+
+To counter this, your Terraform module should contain a values file for each chart used with any required and extra parameters that must be set:
+
+```generation/values/HELM_CHART_NAME.yaml```
+
+The action will pull these values and add them to the chart with the given filename. An example of this is with the AWS Load Balancer Controller Helm chart, which requires the ```clusterName``` parameter to be set. In the module using that chart, the following could be used:
+
+```generation/values/aws-load-balancer-controller.yaml```
+
+```yaml
+clusterName: "test"
+```
 
 ## Helm Version Dependency Upgrades
 
