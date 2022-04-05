@@ -1,0 +1,57 @@
+# action.yml
+name: 'Terraform Helm Digests'
+description: 'Pulls image digests for Helm charts'
+inputs:
+  working-directory:
+    description: 'Directory to run the action in (must be a Git repository)'
+    required: true
+    default: "/github/workspace"
+  chart-file:
+    description: 'Name of the file with the chart versions (default charts.yaml'
+    required: true
+    default: "charts.yaml"
+  image-file:
+    description: 'Name of the file with the image digests (default images.yaml'
+    required: true
+    default: "images.yaml"
+  main-branch:
+    description: 'Name of the main branch in the repository'
+    required: true
+    default: "main"
+  digests-only:
+    description: 'Whether to run only the digest parser'
+    required: true
+    default: ""
+  github-token:
+    description: 'Github token to use for Git operations'
+    required: true
+  quay-username:
+    description: 'Quay.io username'
+    required: false
+  quay-password:
+    description: 'Quay.io password'
+    required: false
+  gcr-json-key:
+    description: 'JSON key for GCR user, see README'
+    required: false
+  aws-access-key-id:
+    description: 'AWS user access key, see README'
+    required: false
+  aws-secret-access-key:
+    description: 'AWS user secret key, see README'
+    required: false
+runs:
+  using: 'docker'
+  image: "Dockerfile"
+  env:
+    WORKING_DIRECTORY: ${{ inputs.working-directory }}
+    CHART_FILE: ${{ inputs.chart-file }}
+    IMAGE_FILE: ${{ inputs.image-file }}
+    MAIN_BRANCH: ${{ inputs.main-branch }}
+    DIGESTS_ONLY: ${{ inputs.digests-only }}
+    GITHUB_TOKEN: ${{ inputs.github-token }}
+    QUAY_USERNAME: ${{ inputs.quay-username }}
+    QUAY_PASSWORD: ${{ inputs.quay-password }}
+    GCR_JSON_KEY: ${{ inputs.gcr-json-key }}
+    AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+    AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
