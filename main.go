@@ -180,6 +180,10 @@ func generateDigests() (changedImages bool) {
 		changedImages = false
 	}
 
+	for _, image := range allImagesRaw {
+		log.Print(image)
+	}
+
 	// Process image paths to seperate registry, repo, name, tags
 	chartImages := getImageData(allImagesRaw)
 
@@ -421,30 +425,51 @@ func getDigests(images []Image) []Image {
 // Pull image parameters from raw image paths
 func getImageData(imagesRaw []string) (images []Image) {
 
-	for _, imageRaw := range imagesRaw {
+	for _, imageString := range imagesRaw {
 
-		var imageStruct Image
+		image, success := parseImageString(imageString)
 
-		imageData, _ := dockerparser.Parse(imageRaw)
-
-		// Registry: quay.io
-		registry := imageData.Registry()
-		// Short name: argoproj/argoexec
-		shortName := imageData.ShortName()
-
-		imageStruct.Name = shortName
-
-		if registry != "docker.io" {
-			imageStruct.Registry = registry
+		if !success {
+			log.Print("Failed image parse: " + imageString)
+		} else {
+			log.Print("Successfully parsed image: " + imageString)
+			images = append(images, image)
 		}
-
-		imageStruct.RawName = imageRaw
-
-		images = append(images, imageStruct)
 	}
 
 	return
 
+}
+
+// Use this function to parse a single image
+// The function includes panic defer management
+// This is required for a RegEx string that is not actually an image
+func parseImageString(imageString string) (image Image, success bool) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			success = false
+			return
+		}
+	}()
+
+	imageData, _ := dockerparser.Parse(imageString)
+
+	// Registry: quay.io
+	registry := imageData.Registry()
+	// Short name: argoproj/argoexec
+	shortName := imageData.ShortName()
+
+	image.Name = shortName
+
+	if registry != "docker.io" {
+		image.Registry = registry
+	}
+
+	image.RawName = imageString
+	success = true
+
+	return
 }
 
 // Function to login to registries
