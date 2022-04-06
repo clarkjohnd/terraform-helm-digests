@@ -396,16 +396,19 @@ func getDigests(images []Image) []Image {
 
 		for _, manifest := range v2Response.Manifests {
 
-			if manifest.Platform.Architecture == "amd64" {
+			if manifest.Platform.OS == "linux" {
 
-				image.Digests.Amd64 = manifest.Digest
-				foundAmd = true
+				if manifest.Platform.Architecture == "amd64" {
 
-			} else if manifest.Platform.Architecture == "arm64" {
+					image.Digests.Amd64 = manifest.Digest
+					foundAmd = true
 
-				image.Digests.Arm64 = manifest.Digest
-				foundArm = true
+				} else if manifest.Platform.Architecture == "arm64" {
 
+					image.Digests.Arm64 = manifest.Digest
+					foundArm = true
+
+				}
 			}
 		}
 
